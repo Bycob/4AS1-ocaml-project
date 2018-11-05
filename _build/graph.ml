@@ -41,7 +41,6 @@ let v_iter gr f = List.iter (fun (id, out) -> f id out) gr
 
 let v_fold gr f acu = List.fold_left (fun acu (id, out) -> f acu id out) acu gr
 
-let rec map gr arc = match arc with
-	| [] -> []
-	| (id, x) :: rest -> (id, int_of_string x) :: map gr rest
+let map gr f = failwith "Graph.map: to be implemented by you."
+
 
