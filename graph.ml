@@ -20,6 +20,8 @@ let find_arc gr id1 id2 =
   try Some (List.assoc id2 out)
   with Not_found -> None
 
+let node_count gr = failwith "Graph.node_count : not implemented yet"
+
 let add_node gr id =
   if node_exists gr id then raise (Graph_error ("Node " ^ id ^ " already exists in the graph."))
   else (id, []) :: gr
@@ -32,7 +34,7 @@ let add_arc gr id1 id2 lbl =
   (* Update out-arcs.
    * remove_assoc does not fail if id2 is not bound.  *)
   let outb = (id2, lbl) :: List.remove_assoc id2 outa in
-  
+
   (* Replace out-arcs in the graph. *)
   let gr2 = List.remove_assoc id1 gr in
   (id1, outb) :: gr2
@@ -44,4 +46,3 @@ let v_fold gr f acu = List.fold_left (fun acu (id, out) -> f acu id out) acu gr
 let rec map gr arc = match arc with
 	| [] -> []
 	| (id, x) :: rest -> (id, int_of_string x) :: map gr rest
-

@@ -10,7 +10,7 @@ let () =
 
   let infile = Sys.argv.(1)
   and outfile = Sys.argv.(4)
-  
+
   (* These command-line arguments are not used for the moment. *)
   and _source = Sys.argv.(2)
   and _sink = Sys.argv.(3)
@@ -20,8 +20,6 @@ let () =
   let graph = Gfile.from_file infile in
 
   (* Rewrite the graph that has been read. *)
-  let () = Gfile.write_file outfile graph in
+  let () = Gfile.export outfile graph in
 
   ()
-
-

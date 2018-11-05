@@ -1,9 +1,9 @@
 open Graph
 open Printf
-    
+
 type path = string
 
-(* Format of text files: lines of the form 
+(* Format of text files: lines of the form
  *
  *  v id               (node with the given identifier)
  *  e label id1 id2    (arc with the given (string) label. Goes from node id1 to node id2.)
@@ -24,9 +24,9 @@ let write_file path graph =
 
   (* Write all arcs *)
   v_iter graph (fun id out -> List.iter (fun (id2, lbl) -> fprintf ff "e \"%s\" %s %s\n" lbl id id2) out) ;
-  
+
   fprintf ff "\n=== End of graph ===\n" ;
-  
+
   close_out ff ;
   ()
 
@@ -62,13 +62,25 @@ let from_file path =
           | 'v' -> read_node graph line
           | 'e' -> read_arc graph line
           | _ -> graph
-      in                 
-      loop graph2        
+      in
+      loop graph2
     with End_of_file -> graph
   in
 
   let final_graph = loop empty_graph in
-  
+
   close_in infile ;
   final_graph
-  
+
+let export path graph =
+  let ff = open_out path in
+
+  fprintf ff "digraph {\n";
+
+  fprintf ff "\tnode [shape=circle];\n";
+
+  v_iter graph (fun id out_list -> List.iter (fun (id2, lbl) -> fprintf ff "\t%s -> %s [label = \"%s\"];\n" id id2 lbl) out_list);
+
+  fprintf ff "}\n";
+  close_out ff;
+  ()
