@@ -39,10 +39,10 @@ val out_arcs: 'a graph -> id -> 'a out_arcs
 (* find_arc gr id1 id2  finds an arc between id1 and id2 and returns its label. Returns None if the arc does not exist.
 * @raise Graph_error if id1 is unknown. *)
 val find_arc: 'a graph -> id -> id -> 'a option
-
+(*
 (* returns the node count *)
 val node_count: 'a graph -> int
-
+*)
 
 (**************  COMBINATORS, ITERATORS  **************)
 
@@ -56,3 +56,4 @@ val v_fold: 'a graph -> ('b -> id -> 'a out_arcs -> 'b) -> 'b -> 'b
 (* maps all arcs of the graph
  * Nodes keep the same identifiers. *)
 val map: 'a graph -> ('a -> 'b) -> 'b graph
+

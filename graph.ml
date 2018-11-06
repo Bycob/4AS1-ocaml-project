@@ -17,10 +17,8 @@ let out_arcs gr id =
 
 let find_arc gr id1 id2 =
   let out = out_arcs gr id1 in
-  try Some (List.assoc id2 out)
-  with Not_found -> None
-
-let node_count gr = failwith "Graph.node_count : not implemented yet"
+    try Some (List.assoc id2 out)
+    with Not_found -> None
 
 let add_node gr id =
   if node_exists gr id then raise (Graph_error ("Node " ^ id ^ " already exists in the graph."))
@@ -37,12 +35,26 @@ let add_arc gr id1 id2 lbl =
 
   (* Replace out-arcs in the graph. *)
   let gr2 = List.remove_assoc id1 gr in
-  (id1, outb) :: gr2
+    (id1, outb) :: gr2
 
 let v_iter gr f = List.iter (fun (id, out) -> f id out) gr
 
 let v_fold gr f acu = List.fold_left (fun acu (id, out) -> f acu id out) acu gr
 
-let rec map gr arc = match arc with
-	| [] -> []
-	| (id, x) :: rest -> (id, int_of_string x) :: map gr rest
+
+
+let rec petite_map (arcs : 'a out_arcs) f = match arcs with
+  | [] -> []
+  | (id_arc, weight) :: rest -> (id_arc, f weight) :: petite_map rest f
+(*
+(* Pour forcer la reconnaissance de la sortie en tant que 'b out_arcs (sans le fichier .mli) : *)
+let petite_map = (petite_map : 'a out_arcs -> ('a -> 'b) -> 'b out_arcs)
+*)
+
+let rec map (gr : 'a graph) f = match gr with
+  | [] -> []
+  | (id_node, arcs) :: rest -> (id_node, petite_map arcs f) :: map rest f
+(*
+(* Pour forcer la reconnaissance de la sortie en tant que 'b graph (sans le fichier .mli) : *)
+let map = (map : 'a graph -> ('a -> 'b) -> 'b graph)
+*)
