@@ -45,7 +45,7 @@ let v_fold gr f acu = List.fold_left (fun acu (id, out) -> f acu id out) acu gr
 
 let rec petite_map (arcs : 'a out_arcs) f = match arcs with
   | [] -> []
-  | (id_arc, weight) :: rest -> (id_arc, f weight) :: petite_map rest f
+  | (next_node, weight) :: rest -> (next_node, f weight) :: petite_map rest f
 (*
 (* Pour forcer la reconnaissance de la sortie en tant que 'b out_arcs (sans le fichier .mli) : *)
 let petite_map = (petite_map : 'a out_arcs -> ('a -> 'b) -> 'b out_arcs)
