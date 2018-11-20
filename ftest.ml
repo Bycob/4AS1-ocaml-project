@@ -17,6 +17,24 @@ let test_graph_map infile outfile =
 
   ()
 
+let unit_test_ford_fulkerson infile outfile =
+
+  let rec display_path = function
+    | [] -> Printf.printf "\n"
+    | (id, tag) :: tail -> Printf.printf "%s : %d -> " id tag; display_path tail
+    in
+  let graph = Gfile.from_file infile in
+  let int_graph = Graph.map graph int_of_string in (
+
+    let path = Ford_fulkerson.find_path int_graph "0" "5" [] in
+    display_path path
+    (*;
+    let graph = Ford_fulkerson.create_residual_graph int_graph in
+    let writable_graph = Graph.map ff_graph string_of_int in
+    Gfile.export outfile writable_graph*)
+  )
+;;
+
 let test_ford_fulkerson infile source sink outfile =
   let graph = Gfile.from_file infile in
   let int_graph = Graph.map graph int_of_string in
@@ -45,5 +63,5 @@ let () =
   and _sink = Sys.argv.(3)
   in
 
-  let () = test_graph_map infile outfile in
+  let () = unit_test_ford_fulkerson infile outfile in
   ()
