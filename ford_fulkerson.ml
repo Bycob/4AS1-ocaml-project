@@ -1,10 +1,22 @@
 open Graph
 
-let find_path 
+type gpath = (id * int) list
 
+let rec find_path gr id_src id_dest acu =
+  if id_src == id_dest then acu
+  else
+    (* Vérifie que le poids de l'arc n'est pas 0 et que le noeud n'a pas déjà été exploré *)
+    let is_valid_arc (id, tag) = tag <> 0 && not (List.exists (fun (other_id, other_tag) -> id = other_id) acu) in
+    let next_nodes = List.filter is_valid_arc (out_arcs gr id_src) in
+    let finish_path (next_id, a) =
+      try Some(find_path gr next_id id_dest acu)
+      with Not_found -> None
+      in
+    let next_paths = List.map finish_path next_nodes in
+    get (List.find is_some next_paths)
 ;;
 
-let rec create_residual_graph (gr : 'a graph) : match gr with
+let rec create_residual_graph (gr : 'a graph) = match gr with
   | [] -> []
 	(* Pour tout node ... *)
   | (id_node, arcs) :: rest_gr -> (id_node,
@@ -21,13 +33,8 @@ let rec create_residual_graph (gr : 'a graph) : match gr with
 									:: (next_node, poids) :: rest_arcs
 											end ) :: create_residual_graph rest_gr f
 
-
 ;;
 
-let iter_fulkerson
+let iter_fulkerson = ();;
 
-;;
-
-let ford_fulkerson 
-
-;;
+let ford_fulkerson (gr : int graph) = gr, 0 ;;
