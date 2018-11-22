@@ -2,13 +2,18 @@ open Graph
 
 type gpath = (id * int) list
 
+let rec display_path = function
+  | [] -> Printf.printf "\n"
+  | (id, tag) :: tail -> Printf.printf "%s : %d -> " id tag; display_path tail
+;;
+
 let rec find_path gr id_src id_dest acu =
-  if id_src == id_dest then acu
+  if id_src = id_dest then acu
   else
     (* Vérifie que le poids de l'arc n'est pas 0 et que le noeud n'a pas déjà été exploré *)
     let is_valid_arc (id, tag) = tag <> 0 && not (List.exists (fun (other_id, other_tag) -> id = other_id) acu) in
     let next_nodes = List.filter is_valid_arc (out_arcs gr id_src) in
-    let finish_path (next_id, a) = find_path gr next_id id_dest acu in
+    let finish_path (next_id, a) = find_path gr next_id id_dest ((next_id, a) :: acu) in
     let rec return_path = function
       | [] -> raise Not_found
       | head :: tail -> try finish_path head with Not_found -> return_path tail
