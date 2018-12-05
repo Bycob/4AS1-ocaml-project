@@ -1,4 +1,5 @@
 open Graph
+open Ford_fulkerson
 
 (** Tests *)
 
@@ -23,10 +24,10 @@ let unit_test_ford_fulkerson infile outfile =
 
     let path = Ford_fulkerson.find_path int_graph "0" "5" [] in
     Ford_fulkerson.display_path path
-    (*;
-    let graph = Ford_fulkerson.create_residual_graph int_graph in
+    ;
+    let ff_graph = Ford_fulkerson.create_residual_graph int_graph in
     let writable_graph = Graph.map ff_graph string_of_int in
-    Gfile.export outfile writable_graph*)
+    Gfile.export outfile writable_graph
   )
 ;;
 

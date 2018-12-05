@@ -21,23 +21,12 @@ let rec find_path gr id_src id_dest acu =
     return_path next_nodes
 ;;
 
-let rec create_residual_graph (gr : 'a graph) = match gr with
-  | [] -> []
-	(* Pour tout node ... *)
-  | (id_node, arcs) :: rest_gr -> (id_node,
-		begin match arcs with
-			| [] -> []
-			(* ... on crée un arc inverse de poids *)
-			| (next_node, poids) :: rest_arcs ->
-				(* ... dont le poids prend en compte celui de l'arc inverse (s'il existe) ... *)
-				( match find_arc gr next_node id_node with
-          | Some (_, poids_inverse) -> add_arc gr id_node next_node (poids_inverse - poids)
-				(* ... ou vaut 0 sinon. *)
-				  | _ -> add_arc gr id_node next_node 0 )
-									(* Puis on renvoie l'arc avec son poids et on continue le parcours. *)
-									:: (next_node, poids) :: rest_arcs
-											end ) :: create_residual_graph rest_gr f
-
+let create_residual_graph (gr : int graph) =
+	let only_nodes = v_fold gr (fun graph_accu id _ -> add_node graph_accu id) empty_graph in
+	v_fold gr (fun graph_accu id_src out_arcs -> (List.fold_left (fun graph_bis (id_dst, lbl) ->
+		let graph_ter = (add_arc graph_bis id_src id_dst lbl) in
+		add_arc graph_ter id_dst id_src 0
+	) graph_accu out_arcs)) only_nodes
 ;;
 
 let iter_fulkerson = ();;

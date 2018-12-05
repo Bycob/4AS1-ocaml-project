@@ -16,5 +16,4 @@ _build/
 *.native
 
 # temp files
-*.ml~
-*.mli~
+*~
