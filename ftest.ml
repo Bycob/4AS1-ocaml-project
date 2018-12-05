@@ -35,7 +35,7 @@ let test_ford_fulkerson infile source sink outfile =
   let graph = Gfile.from_file infile in
   let int_graph = Graph.map graph int_of_string in
 
-  let (ff_graph, _) = Ford_fulkerson.ford_fulkerson int_graph in
+  let (ff_graph, _) = Ford_fulkerson.ford_fulkerson int_graph "0" "5" in
 
   let writable_graph = Graph.map ff_graph string_of_int in
   let () = Gfile.export outfile writable_graph in
@@ -59,5 +59,5 @@ let () =
   and _sink = Sys.argv.(3)
   in
 
-  let () = unit_test_ford_fulkerson infile outfile in
+  let () = test_ford_fulkerson infile _source _sink outfile in
   ()
