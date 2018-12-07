@@ -24,12 +24,13 @@ let rec find_path gr id_src id_dest acu =
     return_path next_nodes
 ;;
 
+let only_nodes gr = v_fold gr (fun accu id _ -> add_node accu id) empty_graph ;;
+
 let create_residual_graph (gr : int graph) =
-	let only_nodes = v_fold gr (fun graph_accu id _ -> add_node graph_accu id) empty_graph in
 	v_fold gr (fun graph_accu id_src out_arcs -> (List.fold_left (fun graph_bis (id_dst, lbl) ->
 		let graph_ter = (add_arc graph_bis id_src id_dst lbl) in
 		add_arc graph_ter id_dst id_src 0
-	) graph_accu out_arcs)) only_nodes
+	) graph_accu out_arcs)) (only_nodes gr)
 ;;
 
 (* Effectue une iteration du ford_fulkerson. Lève l'exception
@@ -41,12 +42,13 @@ let iter_fulkerson (gr_resid, prev_flow) id_src id_dest =
   (* cherche le flux maximum qu'on peut rajouter à ce chemin  *)
   let fold_min acu (_, _, tag) = if acu > (abs tag) then (abs tag) else acu in
   let max_flow = List.fold_left fold_min max_int found_path in
-  (* applique un noeud dans un sens ou dans l'autre (* le sens est soit 1 soit -1 *) *)
+  (* applique un noeud du path dans un sens ou dans l'autre (* le sens est soit 1 soit -1 *) *)
   let apply_arc flow gr id_from id_to = add_arc gr id_from id_to
     (match find_arc gr id_from id_to with
     | None -> raise Not_found (* never raised (normally) *)
     | Some tag -> tag - flow)
   in
+  (* applique un noeud du path dans les deux sens, en prenant en compte le type d'arrête *)
   let apply_node flow gr (id_from, id_to, tag) =
     let signed_flow = if tag > 0 then flow else -flow in
     apply_arc (-signed_flow) (apply_arc signed_flow gr id_from id_to) id_to id_from
@@ -54,12 +56,27 @@ let iter_fulkerson (gr_resid, prev_flow) id_src id_dest =
   (List.fold_left (apply_node max_flow) gr_resid found_path, prev_flow + max_flow)
 ;;
 
+(* Construit un graphe résultat de l'algorithme de fulkerson à partir d'un graphe
+initial et d'un graphe résiduel. *)
+let fancy_ff_graph gr gr_resid =
+  (* fonction retournant une string de la forme flow_count/flow_max pour une arrête du graphe initial. *)
+  let get_tag id_src id_dst flow_max = match find_arc gr_resid id_dst id_src with
+    | None -> raise Not_found (* never raised if gr_resid is valid *)
+    | Some flow_count -> (string_of_int (- flow_count)) ^ "/" ^ (string_of_int flow_max)
+  in
+  (* ajoute un arc d'un noeud du graphe initial au graphe résultat *)
+  let change_single_arc id_src acu (id_dst, tag) = add_arc acu id_src id_dst (get_tag id_src id_dst tag) in
+  (* ajoute tous les arcs d'un noeud du graphe initial au graphe résultat *)
+  let change_arcs_for_node acu id_src out_arcs = List.fold_left (change_single_arc id_src) acu out_arcs in
+  v_fold gr change_arcs_for_node (only_nodes gr);;
+
 let ford_fulkerson (gr : int graph) id_src id_dst =
   let gr_init = create_residual_graph gr in
-  let rec algo_ff (gr_resid, flow) =
+  let rec algo_ff (gr_resid, flow) iter =
     try (
       let (gr_resid_new, flow_new) = iter_fulkerson (gr_resid, flow) id_src id_dst in
-      algo_ff (gr_resid_new, flow_new)
+      let iter_new = Gfile.export ("debug/debug" ^ (string_of_int iter) ^ ".dot") (fancy_ff_graph gr gr_resid); iter + 1 in
+      algo_ff (gr_resid_new, flow_new) iter_new
     ) with Not_found -> (gr_resid, flow)
   in
-  algo_ff (gr_init, 0);;
+  algo_ff (gr_init, 0) 0;;

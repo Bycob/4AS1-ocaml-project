@@ -17,3 +17,6 @@ _build/
 
 # temp files
 *~
+
+# debug directory
+debug/
