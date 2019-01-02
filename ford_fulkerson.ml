@@ -27,14 +27,25 @@ let rec find_path gr id_src id_dest acu =
 let only_nodes gr = v_fold gr (fun accu id _ -> add_node accu id) empty_graph ;;
 
 let create_residual_graph (gr : int graph) =
-	v_fold gr (fun graph_accu id_src out_arcs -> (List.fold_left (fun graph_bis (id_dst, lbl) ->
+  (* Fusionne les double arretes sur un graphe, c'est-a-dire les couples d'arretes
+   * (id1 -> id2), (id2 -> id1) *)
+  let merge_edges gr = v_fold gr (fun accu id_src out_arcs ->
+    List.fold_left (fun accu2 (id_dst, lbl) -> match find_arc accu2 id_dst id_src with
+      | None -> add_arc accu2 id_src id_dst lbl
+      | Some currentLbl -> if (currentLbl > lbl)
+        then add_arc accu2 id_dst id_src (currentLbl - lbl)
+        else add_arc (remove_arc accu2 id_dst id_src) id_src id_dst (lbl - currentLbl)
+      ) accu out_arcs)
+    (only_nodes gr)
+  in
+	v_fold (merge_edges gr) (fun graph_accu id_src out_arcs -> (List.fold_left (fun graph_bis (id_dst, lbl) ->
 		let graph_ter = (add_arc graph_bis id_src id_dst lbl) in
 		add_arc graph_ter id_dst id_src 0
 	) graph_accu out_arcs)) (only_nodes gr)
 ;;
 
 (* Effectue une iteration du ford_fulkerson. Lève l'exception
-Not_found si le noeud n'a pas été trouvé. *)
+ * Not_found aucun chemin n'a été trouvé *)
 (*TODO lever une exception si id_src = id_dest *)
 let iter_fulkerson (gr_resid, prev_flow) id_src id_dest =
   (* cherche un chemin entre id_src et id_dest *)
@@ -51,7 +62,7 @@ let iter_fulkerson (gr_resid, prev_flow) id_src id_dest =
   (* applique un noeud du path dans les deux sens, en prenant en compte le type d'arrête *)
   let apply_node flow gr (id_from, id_to, tag) =
     let signed_flow = if tag > 0 then flow else -flow in
-    apply_arc (-signed_flow) (apply_arc signed_flow gr id_from id_to) id_to id_from
+    apply_arc signed_flow (apply_arc signed_flow gr id_from id_to) id_to id_from
   in
   (List.fold_left (apply_node max_flow) gr_resid found_path, prev_flow + max_flow)
 ;;
@@ -75,7 +86,7 @@ let ford_fulkerson (gr : int graph) id_src id_dst =
   let rec algo_ff (gr_resid, flow) iter =
     try (
       let (gr_resid_new, flow_new) = iter_fulkerson (gr_resid, flow) id_src id_dst in
-      let iter_new = Gfile.export ("debug/debug" ^ (string_of_int iter) ^ ".dot") (fancy_ff_graph gr gr_resid); iter + 1 in
+      let iter_new = if iter > 100 then () else Gfile.export ("debug/debug" ^ (string_of_int iter) ^ ".dot") (fancy_ff_graph gr gr_resid); iter + 1 in
       algo_ff (gr_resid_new, flow_new) iter_new
     ) with Not_found -> (gr_resid, flow)
   in

@@ -22,6 +22,10 @@ val add_node: 'a graph -> id -> 'a graph
  * @raise Graph_error if id1 or id2 does not exist in the graph. *)
 val add_arc: 'a graph -> id -> id -> 'a -> 'a graph
 
+(* remove_arc gr id1 id2 lbl  : removes the arc from node id1 to node id2.
+ * If there is no such arc, then no arc is removed (No exception). *)
+val remove_arc: 'a graph -> id -> id -> 'a graph
+
 
 (**************  GETTERS  *****************)
 
@@ -56,4 +60,3 @@ val v_fold: 'a graph -> ('b -> id -> 'a out_arcs -> 'b) -> 'b -> 'b
 (* maps all arcs of the graph
  * Nodes keep the same identifiers. *)
 val map: 'a graph -> ('a -> 'b) -> 'b graph
-
