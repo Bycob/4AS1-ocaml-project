@@ -7,6 +7,7 @@ let rec display_path = function
   | (id_from, id_to, tag) :: tail -> Printf.printf "%s <-- %d -- %s, " id_to tag id_from; display_path tail
 ;;
 
+
 let rec find_path gr id_src id_dest acu =
   if id_src = id_dest then acu
   else
@@ -23,6 +24,7 @@ let rec find_path gr id_src id_dest acu =
     in
     return_path next_nodes
 ;;
+
 
 let only_nodes gr = v_fold gr (fun accu id _ -> add_node accu id) empty_graph ;;
 
@@ -43,6 +45,7 @@ let create_residual_graph (gr : int graph) =
 		add_arc graph_ter id_dst id_src 0
 	) graph_accu out_arcs)) (only_nodes gr)
 ;;
+
 
 (* Effectue une iteration du ford_fulkerson. Lève l'exception
  * Not_found aucun chemin n'a été trouvé *)
@@ -67,6 +70,7 @@ let iter_fulkerson (gr_resid, prev_flow) id_src id_dest =
   (List.fold_left (apply_node max_flow) gr_resid found_path, prev_flow + max_flow)
 ;;
 
+
 (* Construit un graphe résultat de l'algorithme de fulkerson à partir d'un graphe
 initial et d'un graphe résiduel. *)
 let fancy_ff_graph gr gr_resid =
@@ -79,7 +83,9 @@ let fancy_ff_graph gr gr_resid =
   let change_single_arc id_src acu (id_dst, tag) = add_arc acu id_src id_dst (get_tag id_src id_dst tag) in
   (* ajoute tous les arcs d'un noeud du graphe initial au graphe résultat *)
   let change_arcs_for_node acu id_src out_arcs = List.fold_left (change_single_arc id_src) acu out_arcs in
-  v_fold gr change_arcs_for_node (only_nodes gr);;
+  v_fold gr change_arcs_for_node (only_nodes gr)
+;;
+
 
 let ford_fulkerson (gr : int graph) id_src id_dst =
   let gr_init = create_residual_graph gr in
